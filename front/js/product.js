@@ -4,17 +4,21 @@
 
 let params = new URLSearchParams(document.location.search).get('id');
 addProduct();
-
+//
+//------ Recherche un produit par son id ------//
+//
 async function addProduct() {
   await fetch('http://localhost:3000/api/products/' + params)
     .then((res) => res.json())
     .then((data) => card(data))
     .catch((error) => {
       console.log(error);
-      window.alert('Connexion au serveur impossible');
+      window.alert('Impossible de se connecter au serveur');
     });
 }
-
+//
+//------ Création de la balise option de couleur ------//
+//
 function createOption(Choice) {
   const Option = document.createElement('option');
   Option.value = Choice;
@@ -22,7 +26,9 @@ function createOption(Choice) {
   const parent = document.querySelector('#colors');
   parent.appendChild(Option);
 }
-
+//
+//------Récupération des données du fetch ------//
+//
 function card(data) {
   if (data != null) {
     let parent = document.querySelector('.item__img');
@@ -42,7 +48,9 @@ function card(data) {
     }
   }
 }
-
+//
+//------ Contrôle la quantité  ------//
+//
 function quantityControl() {
   const quantityValue = document.querySelector('#quantity').value;
   if (quantityValue != null) {
@@ -55,7 +63,9 @@ document.querySelector('#addToCart').addEventListener('click', addItemToCart);
 
 document.querySelector('[name="itemQuantity"]').addEventListener('input',updateCartItemQuantity);
 document.querySelector('[name="itemQuantity"]').addEventListener('keyup', quantityControl);
-
+//
+//------ Ajout d'un article ------//
+//
 function addItemToCart() {
   const selectedQuantity = document.querySelector('#quantity').value;
   const selectedColor = document.querySelector('#colors').value;
@@ -109,7 +119,9 @@ function addItemToCart() {
     checkFieldsValidity(selectedQuantity, selectedColor);
   }
 }
-
+//
+//------ Test champs remplis -----//
+//
 function checkFieldsValidity(quantity, color) {
 		const inputElement = document.querySelector('input');
 		const selectElement = document.querySelector('select');
