@@ -114,7 +114,7 @@ function addItemToCart() {
     }
 
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    window.location.href = 'index.html';
+    window.location.href = 'cart.html';
   } else {
     checkFieldsValidity(selectedQuantity, selectedColor);
   }
