@@ -1,12 +1,10 @@
-//
-//------ Récuparation de l'URL et de l'ID de l'article ------//
-//
+//------ Récupération de l'URL et de l'ID de l'article ------//
 
 let params = new URLSearchParams(document.location.search).get('id');
 addProduct();
-//
-//------ Recherche un produit par son id ------//
-//
+
+//------ Recherche d'un produit par son ID ------//
+
 async function addProduct() {
   await fetch('http://localhost:3000/api/products/' + params)
     .then((res) => res.json())
@@ -16,9 +14,9 @@ async function addProduct() {
       window.alert('Impossible de se connecter au serveur');
     });
 }
-//
+
 //------ Création de la balise option de couleur ------//
-//
+
 function createOption(Choice) {
   const Option = document.createElement('option');
   Option.value = Choice;
@@ -26,9 +24,9 @@ function createOption(Choice) {
   const parent = document.querySelector('#colors');
   parent.appendChild(Option);
 }
-//
-//------Récupération des données du fetch ------//
-//
+
+//------ Récupération des données du fetch ------//
+
 function card(data) {
   if (data != null) {
     let parent = document.querySelector('.item__img');
@@ -48,9 +46,9 @@ function card(data) {
     }
   }
 }
-//
-//------ Contrôle la quantité  ------//
-//
+
+//------ Contrôle de la quantité ------//
+
 function quantityControl() {
   const quantityValue = document.querySelector('#quantity').value;
   if (quantityValue != null) {
@@ -61,11 +59,11 @@ function quantityControl() {
 
 document.querySelector('#addToCart').addEventListener('click', addItemToCart);
 
-document.querySelector('[name="itemQuantity"]').addEventListener('input',updateCartItemQuantity);
+document.querySelector('[name="itemQuantity"]').addEventListener('input', updateCartItemQuantity);
 document.querySelector('[name="itemQuantity"]').addEventListener('keyup', quantityControl);
-//
-//------ Ajout d'un article ------//
-//
+
+//------ Ajout d'un article au panier ------//
+
 function addItemToCart() {
   const selectedQuantity = document.querySelector('#quantity').value;
   const selectedColor = document.querySelector('#colors').value;
@@ -79,7 +77,11 @@ function addItemToCart() {
       color: selectedColor,
     };
 
-    if (cartItems === null) {
+    if (!Array.isArray(cartItems)) {
+      cartItems = [];
+    }
+
+    if (cartItems === null || cartItems === undefined) {
       cartItems = [];
       cartItems.push(item);
     } else {
@@ -115,55 +117,79 @@ function addItemToCart() {
 
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
     window.location.href = 'cart.html';
+
+    showAddToCartMessage('Produit ajouté au panier');
   } else {
     checkFieldsValidity(selectedQuantity, selectedColor);
   }
 }
-//
-//------ Test champs remplis -----//
-//
-function checkFieldsValidity(quantity, color) {
-		const inputElement = document.querySelector('input');
-		const selectElement = document.querySelector('select');
-		const quantityParent = document.getElementById('quantity');
-		const colorParent = document.getElementById('colors');
 
-				if (quantity <= 0 || quantity > 100) {
-					inputElement.style.border = '2px solid #FF0000';
-				} else {
-					inputElement.style.border = 'none';
-				}
+//------ Affichage d'un message d'ajout au panier ------//
 
-				if (color === '') {
-					selectElement.style.border = '2px solid #FF0000';
-				} else {
-					selectElement.style.border = 'none';
-				}
-			}
+function showAddToCartMessage(message) {
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('add-to-cart-message');
+  messageElement.textContent = message;
 
-function updateCartItemQuantity() {
-			const selectedColor = document.querySelector('#colors').value;
-			let cartItems = getByIdColor(params, selectedColor);
-			let updatedQuantity = parseInt(document.querySelector('#quantity').value);
+  const containerElement = document.createElement('div');
+  containerElement.classList.add('add-to-cart-message-container');
+  containerElement.appendChild(messageElement);
 
-			if (updatedQuantity !== null && cartItems !== undefined) {
-				cartItems.quantity = updatedQuantity;
-				localStorage.setItem('cartItems', JSON.stringify(cartItems));
-			}
+  const bodyElement = document.querySelector('body');
+  bodyElement.insertAdjacentElement('afterbegin', containerElement);
+
+  // Supprimer le message après quelques secondes
+  setTimeout(function () {
+    containerElement.remove();
+  }, 5000);
 }
 
-function getByIdColor(id, color) {
-			let cartItems = JSON.parse(localStorage.getItem('cartItems'));
+//------ Vérification de la validité des champs ------//
 
-			if (cartItems !== null) {
-				for (let i = 0; i < cartItems.length; i++) {
-					if (cartItems[i].id === id && cartItems[i].color === color) {
-						return cartItems[i];
-					}
-				}
-			}
+function checkFieldsValidity(quantity, color) {
+  const inputElement = document.querySelector('input');
+  const selectElement = document.querySelector('select');
+  const quantityParent = document.getElementById('quantity');
+  const colorParent = document.getElementById('colors');
+
+  if (quantity <= 0 || quantity > 100) {
+    inputElement.style.border = '2px solid #FF0000';
+  } else {
+    inputElement.style.border = 'none';
+  }
+
+  if (color === '') {
+    selectElement.style.border = '2px solid #FF0000';
+  } else {
+    selectElement.style.border = 'none';
+  }
+}
+
+//------ Mise à jour de la quantité de l'article du panier ------//
+
+function updateCartItemQuantity() {
+  const selectedColor = document.querySelector('#colors').value;
+  let cartItems = getByIdColor(params, selectedColor);
+  let updatedQuantity = parseInt(document.querySelector('#quantity').value);
+
+  if (updatedQuantity !== null && cartItems !== undefined) {
+    cartItems.quantity = updatedQuantity;
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }
+}
+
+//------ Recherche d'un article par son ID et sa couleur ------//
+
+function getByIdColor(id, color) {
+  let cartItems = JSON.parse(localStorage.getItem('cartItems'));
+
+  if (cartItems !== null) {
+    for (let i = 0; i < cartItems.length; i++) {
+      if (cartItems[i].id === id && cartItems[i].color === color) {
+        return cartItems[i];
+      }
+    }
+  }
 
   return undefined;
 }
-
-
