@@ -112,9 +112,10 @@ h2 {
 }
 .cart__order__form__question p {
 	margin: 0;
-	color: #fbbcbc;
+	color: #0b0b0b;
 	font-size: 15px;
 	margin-left: 8px;
+	padding-top: 5px;
 }
 .cart__order__form__submit {
 	display: flex;
@@ -126,7 +127,7 @@ h2 {
 	border: 0;
 	background-color: var(--secondary-color);
 	color: white;
-	padding: 18px 28px;
+	padding: 18px 28px ;
 	cursor: pointer;
 	margin-top: 40px;
 }
