@@ -1,36 +1,47 @@
+// Déclaration du tableau cartItems //
 let cartItems = [];
 
+// Appel de la fonction addProduct //
 addProduct();
 
+// Sélection du bouton de commande //
 const orderButton = document.querySelector('#order');
-orderButton.addEventListener('click', (order) => submitForm(order));
+orderButton.addEventListener('click', submitForm);
 
+// Sélection des champs d'entrée pour les événements de saisie //
 const firstNameInput = document.getElementById('firstName');
-firstNameInput.addEventListener('keyup', () => testInputValidity(firstNameInput));
+firstNameInput.addEventListener('keyup', () => testForm());
 
 const lastNameInput = document.getElementById('lastName');
-lastNameInput.addEventListener('keyup', () => testInputValidity(lastNameInput));
+lastNameInput.addEventListener('keyup', () => testForm());
 
 const cityInput = document.getElementById('city');
-cityInput.addEventListener('keyup', () => testInputValidity(cityInput));
+cityInput.addEventListener('keyup', () => testForm());
 
+const addressInput = document.getElementById('address');
+addressInput.addEventListener('keyup', () => testForm());
+
+const emailInput = document.getElementById('email');
+emailInput.addEventListener('input', controlEmail);
+emailInput.addEventListener('keyup', () => testForm());
+
+// Fonction pour ajouter un produit
 function addProduct() {
   const savedItems = localStorage.getItem('cartItems');
   const parsedItems = JSON.parse(savedItems);
-  
+
   if (parsedItems != null) {
     for (const item of parsedItems) {
       card(item.id, item.color, item.quantity);
     }
   }
-  
-  initLoad();
 }
 
-async function card (id, color, quantity) {
+// Fonction pour créer un élément article pour un produit dans le panier
+async function card(id, color, quantity) {
   const response = await fetch('http://localhost:3000/api/products/' + id);
   const data = await response.json();
-  
+
   const item = {
     id,
     color,
@@ -38,13 +49,15 @@ async function card (id, color, quantity) {
     name: data.name,
     imageUrl: data.imageUrl,
     altTxt: data.altTxt,
-    price: data.price
+    price: data.price,
   };
-  
+
   cartItems.push(item);
   displayCartItem(item);
 }
 
+
+// Fonction pour afficher un produit dans le panier //
 function displayCartItem(item) {
   const article = createArticleElement(item);
   const imageDiv = createImageDivElement(item);
@@ -57,9 +70,9 @@ function displayCartItem(item) {
   displayTotalPrice();
   displayTotalQuantity();
 
-  initLoad();
 }
 
+// Fonction pour créer un élément article //
 function createArticleElement(item) {
   const article = document.createElement('article');
   article.classList.add('cart__item');
@@ -68,6 +81,7 @@ function createArticleElement(item) {
   return article;
 }
 
+// Fonction pour créer un élément div pour l'image du produit //
 function createImageDivElement(item) {
   const div = document.createElement('div');
   div.classList.add('cart__item__img');
@@ -80,6 +94,7 @@ function createImageDivElement(item) {
   return div;
 }
 
+// Fonction pour créer un élément div pour le contenu du produit //
 function createContentDivElement(item) {
   const div = document.createElement('div');
   div.classList.add('cart__item__content');
@@ -92,6 +107,7 @@ function createContentDivElement(item) {
   return div;
 }
 
+// Fonction pour créer un élément div pour la description du produit //
 function createDescriptionElement(item) {
   const description = document.createElement('div');
   description.classList.add('cart__item__content__description');
@@ -111,6 +127,7 @@ function createDescriptionElement(item) {
   return description;
 }
 
+// Fonction pour créer un élément div pour les paramètres du produit //
 function createSettingsDivElement(item) {
   const settings = document.createElement('div');
   settings.classList.add('cart__item__content__settings');
@@ -120,6 +137,7 @@ function createSettingsDivElement(item) {
   return settings;
 }
 
+// Fonction pour ajouter un élément div pour la quantité du produit //
 function addQuantityDivElement(settings, item) {
   const div = document.createElement('div');
   div.classList.add('cart__item__content__settings__quantity');
@@ -134,17 +152,38 @@ function addQuantityDivElement(settings, item) {
   input.value = item.quantity;
   input.addEventListener('input', () => updateQuantity(input, item));
   div.appendChild(input);
+  input.setAttribute('min', 1);
+  input.setAttribute('max', 100);
 
   settings.appendChild(div);
 }
 
+// Fonction pour mettre à jour la quantité du produit //
 function updateQuantity(input, item) {
   const newQuantity = parseInt(input.value);
+  if(newQuantity < 1) {
+    newQuantity = 1;
+  } else if (newQuantity > 100) {
+    newQuantity = 100;
+  }
+  input.value = newQuantity;
   item.quantity = newQuantity;
+  updateLocalStorage();
   displayTotalPrice();
   displayTotalQuantity();
 }
 
+// Fonction pour mettre à jour le stockage local //
+function updateLocalStorage() {
+  const temporaryArray = cartItems.map((item) => ({
+    id: item.id,
+    color: item.color,
+    quantity: item.quantity,
+  }));
+  localStorage.setItem('cartItems', JSON.stringify(temporaryArray));
+}
+
+// Fonction pour ajouter un élément div pour la suppression du produit //
 function addDeleteDivElement(settings, item) {
   const div = document.createElement('div');
   div.classList.add('cart__item__content__settings__delete');
@@ -158,194 +197,111 @@ function addDeleteDivElement(settings, item) {
   settings.appendChild(div);
 }
 
-// Supression de ID sur le local storage //
+// Fonction pour supprimer un produit //
 function deleteItem(item) {
-  let indexToDelete = cartItems.findIndex((cartItem) => cartItem.id === item.id  && cartItem.color === item.color);
-  if(indexToDelete > -1) {
-    cartItems.splice( indexToDelete, 1);
-
-    let temporaryArray = [];
-    for (let i = 0; i < cartItems.length; i++) {
-      const temporaryObjet = {
-        id: cartItems[i].id,
-        color : cartItems[i].color,
-        quantity : cartItems[i].quantity,
-      };
-      temporaryArray.push(temporaryObjet);
-    }
-    localStorage.clear();
-    localStorage.setItem('cardItems', JSON.stringify(temporaryArray));
+  const indexToDelete = cartItems.findIndex(
+    (cartItem) => cartItem.id === item.id && cartItem.color === item.color
+  );
+  if (indexToDelete > -1) {
+    cartItems.splice(indexToDelete, 1);
+    updateLocalStorage();
   }
-  const parentElement = document.querySelector(`article[data-id="${item.id}"][data-color="${item.color}"]`);
+  const parentElement = document.querySelector(
+    `article[data-id="${item.id}"][data-color="${item.color}"]`
+  );
   parentElement.remove();
   displayTotalPrice();
   displayTotalQuantity();
 }
 
+/// ------ Fonctions d'affichage des totaux ------ ///
+
+// Fonction pour afficher la quantité totale des produits dans le panier //
 function displayTotalQuantity() {
   const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
   document.querySelector('#totalQuantity').textContent = totalQuantity;
 }
 
+// Fonction pour afficher le prix total des produits dans le panier //
 function displayTotalPrice() {
-  const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
   document.querySelector('#totalPrice').textContent = totalPrice + '€';
 }
 
-function initLoad() {
-	const email = document.querySelector('#email');
-	email.addEventListener('keyup', (element) => controlEmail());
-
-	const form = document.querySelector('.cart__order__form');
-	const inputs = form.querySelectorAll('input');
-	inputs.forEach((element) => {
-		if (element.value != '') {
-			if (element.id === 'order') element.setAttribute('style', 'padding-left: 15px;');
-			if (element.id != 'order') element.setAttribute('style', 'padding-left: 15px;');
-		} else {
-			if (element.id != 'order') element.setAttribute('style', 'padding-left: 15px;');
-		}
-	});
-}
-
-
-function testInputValidity (parent) {
-  const invalidCharacters = /[0-9'"=+]/g;
-  const textTemp = parent.value;
-  const newStr = textTemp.replace(invalidCharacters, '');
-  parent.value = newStr;
-}
-
-function controlEmail() {
-  const pattern = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/i);
-  const elem = document.querySelector('#email');
-  const valueTextEmail = elem.value;
-  const resultRegex = valueTextEmail.match(pattern);
-  const errorMsg = document.querySelector('#emailErrorMsg');
-
-  if (resultRegex == null) {
-    elem.setAttribute('style', 'color: #ff0000; padding-left: 10px;');
-    errorMsg.textContent = 'Veuillez renseigner une adresse email valide pour continuer';
-    return false;
-  } else {
-    elem.setAttribute('style', 'color: #000; padding-left: 10px;');
-    errorMsg.textContent = '';
-    return true;
-  }
-}
-
-function addDivQuantity(settings, item) {
-  const quantity = document.createElement('div');
-  quantity.className = 'cart__item__content__settings__quantity';
-
-  quantity.innerHTML = `
-    <p>Qté : </p>
-    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${parseInt(item.quantity)}">
-  `;
-
-  const input = quantity.querySelector('.itemQuantity');
-
-  input.addEventListener('keyup', () => controlQuantity(item, input));
-  input.addEventListener('input', () => updateCartItemQuantity(item, input));
-
-  settings.appendChild(quantity);
-}
-
-function controlQuantity(item, input) {
-	let newQuantity = parseInt(input.value);
-
-	if (newQuantity < 1 || isNaN(newQuantity) || newQuantity === '') {
-		newQuantity = 1;
-	}
-
-	if (newQuantity > 100) {
-		newQuantity = 100;
-	}
-
-	input.value = newQuantity;
-
-	let cartItems = JSON.parse(localStorage.getItem('product'));
-	for (let i = 0; i < cartItems.length; i++) {
-		if (cartItems[i].id == item.id && cartItems[i].color == item.color) {
-			if (newQuantity > 0 && newQuantity <= 100) {
-				cartItems[i].quantity = newQuantity;
-			} else {
-				cartItems[i].quantity = 1;
-			}
-			break;
-		}
-	}
-
-	localStorage.setItem('product', JSON.stringify(cartItems));
-	displayTotalPrice();
-	displayTotalQuantity();
-}
-
+// Fonction pour mettre à jour la quantité d'un produit dans le panier //
 function updateCartItemQuantity(item, input) {
-	const maxValue = 100;
-	let newValue = parseInt(input.value);
+  const maxValue = 100;
+  let newValue = parseInt(input.value);
 
-	if (newValue > maxValue) {
-		input.value = maxValue;
-	}
+  if (newValue > maxValue) {
+    input.value = maxValue;
+  }
 
-	item.quantity = parseInt(newValue);
+  item.quantity = parseInt(newValue);
 
-	let cartItems = JSON.parse(localStorage.getItem('product'));
-	for (let i = 0; i < cartItems.length; i++) {
-		if (cartItems[i].id === item.id && cartItems[i].color === item.color) {
-			if (newValue > 0 && newValue <= maxValue) {
-				cartItems[i].quantity = newValue;
-			} else {
-				cartItems[i].quantity = 1;
-			}
-			break;
-		}
-	}
+  let cartItems = JSON.parse(localStorage.getItem('product'));
+  for (let i = 0; i < cartItems.length; i++) {
+    if (cartItems[i].id === item.id && cartItems[i].color === item.color) {
+      if (newValue > 0 && newValue <= maxValue) {
+        cartItems[i].quantity = newValue;
+      } else {
+        cartItems[i].quantity = 1;
+      }
+      break;
+    }
+  }
 
-	localStorage.setItem('cartItems', JSON.stringify(cartItems));
-	displayTotalPrice();
-	displayTotalQuantity();
+  localStorage.setItem('product', JSON.stringify(cartItems));
+  displayTotalPrice();
+  displayTotalQuantity();
 }
 
+// Fonction pour créer l'objet de formulaire de contact
 function createContactFormObject() {
   const form = document.querySelector('.cart__order__form');
-  
+
   const contactInfo = {
     firstName: form.firstName.value,
     lastName: form.lastName.value,
     address: form.address.value,
     city: form.city.value,
-    email: form.email.value
+    email: form.email.value,
   };
-  
-  const productList = listIDs();
-  
+
+  const productList = listID();
+
   const contactFormObject = {
     contact: contactInfo,
-    products: productList
+    products: productList,
   };
-  
+
   return contactFormObject;
 }
 
+// Fonction pour soumettre le formulaire //
+
 function submitForm(order) {
   order.preventDefault(); // Empêche le rafraîchissement de la page
-  
+
   if (cartItems.length === 0) {
-    theBasketIsEmpty();
+    emptyBasket();
     return;
   }
-  
-  const pass = testFieldsIsEmpty(); // Vérifie si les champs sont vides
+
+  const pass = testForm(); // Vérifie si les champs sont vides //
   if (pass) {
     const contactForm = createContactFormObject(); // Construit l'objet avec les données de contact et la liste des IDs des articles
-    
+
     if (controlEmail()) {
       sendCommand(contactForm);
     }
   }
 }
+
+// Fonction pour envoyer la commande //
 
 async function sendCommand(contactForm) {
   try {
@@ -354,9 +310,9 @@ async function sendCommand(contactForm) {
       body: JSON.stringify(contactForm),
       headers: { 'Content-Type': 'application/json' },
     });
-    
+
     const data = await response.json();
-    
+
     const orderId = data.orderId;
     window.location.href = 'confirmation.html?orderId=' + orderId;
   } catch (err) {
@@ -365,100 +321,126 @@ async function sendCommand(contactForm) {
   }
 }
 
-function listIDs() {
-  return cart.map(item => item.id);
+// Fonction pour obtenir la liste des IDs des produits dans le panier //
+
+function listID() {
+  let ID = [];
+  for (let i = 0; i < cartItems.length; i++) {
+    ID.push(cartItems[i].id);
+  }
+  return ID;
 }
 
+// Fonction pour afficher le panier vide //
 
-function theBasketIsEmpty() {
-	const parent = document.querySelector('#emptybasket');
-	parent.style.color = 'white';
-	parent.style.fontweight = 'bold';
-	parent.style.borderStyle = 'solid';
-	parent.style.borderColor = '#fff';
-	parent.style.background = '#3d4c68';
-	parent.style.padding = '10px';
-	parent.style.borderRadius = '15px';
-	parent.style.textAlign = 'center';
-	parent.textContent = 'Votre panier est vide';
+function emptyBasket() {
+  const parent = document.querySelector('#emptybasket');
+  parent.style.color = 'white';
+  parent.style.fontweight = 'bold';
+  parent.style.borderStyle = 'solid';
+  parent.style.borderColor = '#fff';
+  parent.style.background = '#3d4c68';
+  parent.style.padding = '10px';
+  parent.style.borderRadius = '20px';
+  parent.style.textAlign = 'center';
+  parent.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+  parent.textContent = 'Votre panier est vide';
 }
 
-function testInData(element) {
-	if (element.id != 'order') {
-		if (element.value === '') {
-			element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-		} else {
-			element.setAttribute('style', 'border:1px solid #767676; padding-left: 15px;');
-			switch (element.id) {
-				case 'firstName': {
-					document.querySelector('#firstNameErrorMsg').textContent = '';
-					break;
-				}
-				case 'lastName': {
-					document.querySelector('#lastNameErrorMsg').textContent = '';
-					break;
-				}
-				case 'address': {
-					document.querySelector('#addressErrorMsg').textContent = '';
-					break;
-				}
-				case 'city': {
-					document.querySelector('#cityErrorMsg').textContent = '';
-					break;
-				}
-			}
-		}
-	}
-}
-function testFieldsIsEmpty() {
-	const form = document.querySelector('.cart__order__form');
-	const inputs = form.querySelectorAll('input');
-	let pass = true;
-	inputs.forEach((element) => {
-		element.addEventListener('input', () => testInData(element));
+// Fonction pour contrôler la validité de l'adresse e-mail //
+function controlEmail() {
+  const inputEmail = document.getElementById('email').value;
+  const pattern = new RegExp(
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/i
+  );
+  const elem = document.querySelector('#email');
+  const valueTextEmail = elem.value;
+  const resultRegex = valueTextEmail.match(pattern);
+  const errorMsg = document.querySelector('#emailErrorMsg');
 
-		switch (element.id) {
-			case 'firstName': {
-				if (element.value == '') {
-					element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-					document.querySelector('#firstNameErrorMsg').textContent = 'Veuillez entrer votre prénom';
-					pass = false;
-          break;
-				}
-			}
-			case 'lastName': {
-				if (element.value == '') {
-					element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-					document.querySelector('#lastNameErrorMsg').textContent = 'Veuillez entrer votre nom';
-					pass = false;
-          break;
-				}
-			}
-			case 'address': {
-				if (element.value == '') {
-					element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-					document.querySelector('#addressErrorMsg').textContent = 'Veuillez entrer votre adresse';
-					pass = false;
-          break;
-				}
-			}
-			case 'city': {
-				if (element.value == '') {
-					element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-					document.querySelector('#cityErrorMsg').textContent = 'Veuillez entrer une ville';
-					pass = false;
-          break;
-				}
-			}
-			case 'email': {
-				if (element.value == '') {
-					element.setAttribute('style', 'border:1px solid #FF0000; padding-left: 15px;');
-					document.querySelector('#emailErrorMsg').textContent = 'Veuillez renseigner une adresse email valide pour continuer';
-					pass = false;
-          break;
-				}
-			}
-		}
-	});
-	return pass;
+  if (resultRegex == null) {
+    elem.setAttribute('style', 'color: #ff0000; padding-left: 15px;');
+    errorMsg.textContent = 'Veuillez renseigner une adresse email valide pour continuer';
+    return false;
+  } else {
+    elem.setAttribute('style', 'color: black; padding-left: 10px;');
+    errorMsg.textContent = '';
+    return true;
+  }
+}
+
+// Fonction pour tester si les champs du formulaire de saisie sont vides //
+
+function testForm() {
+  const form = document.querySelector('.cart__order__form');
+  const inputs = form.querySelectorAll('input');
+  let pass = true;
+  inputs.forEach((element) => {
+    switch (element.id) {
+      case 'firstName': {
+        if (element.value === '' || /\d/.test(element.value)) {
+          element.value = element.value.replace(/\d/g, ''); // Supprime les chiffres de la valeur
+          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px;');
+          document.getElementById('firstNameErrorMsg').style.display = 'block';
+          document.querySelector('#firstNameErrorMsg').textContent = 'Veuillez renseigner votre prénom';
+          pass = false;
+        } else {
+          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
+          document.getElementById('firstNameErrorMsg').style.display = 'none';
+        }
+        break;
+      }
+      case 'lastName': {
+        if (element.value === '' || /\d/.test(element.value)) {
+          element.value = element.value.replace(/\d/g, '');
+          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px;');
+          document.getElementById('lastNameErrorMsg').style.display = 'block';
+          document.querySelector('#lastNameErrorMsg').textContent = 'Veuillez renseigner votre nom';
+          pass = false;
+        } else {
+          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
+          document.getElementById('lastNameErrorMsg').style.display = 'none';
+        }
+        break;
+      }
+      case 'address': {
+        if (element.value === '') {
+          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px;');
+          document.getElementById('addressErrorMsg').style.display = 'block';
+          document.querySelector('#addressErrorMsg').textContent = 'Veuillez renseigner votre adresse';
+          pass = false;
+        } else {
+          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
+          document.getElementById('addressErrorMsg').style.display = 'none';
+        }
+        break;
+      }
+      case 'city': {
+        if (element.value === '') {
+          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px');
+          document.getElementById('cityErrorMsg').style.display = 'block';
+          document.querySelector('#cityErrorMsg').textContent = 'Veuillez renseigner votre ville';
+          pass = false;
+        } else {
+          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
+          document.getElementById('cityErrorMsg').style.display = 'none';
+        }
+        break;
+      }
+      case 'email': {
+        if (element.value === '') {
+          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px');
+          document.getElementById('emailErrorMsg').style.display = 'block';
+          document.querySelector('#emailErrorMsg').textContent =
+            'Veuillez renseigner une adresse email valide pour continue';
+          pass = false;
+        } else {
+          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
+          document.getElementById('emailErrorMsg').style.display = 'none';
+        }
+        break;
+      }
+    }
+  });
+  return pass;
 }
