@@ -71,52 +71,41 @@ function addItemToCart() {
   if (selectedQuantity > 0 && selectedQuantity <= 100 && selectedColor !== '') {
     let cartItems = JSON.parse(localStorage.getItem('cartItems'));
 
-    let item = {
-      id: params,
-      quantity: parseInt(selectedQuantity),
-      color: selectedColor,
-    };
-
     if (!Array.isArray(cartItems)) {
       cartItems = [];
     }
 
-    if (cartItems === null || cartItems === undefined) {
-      cartItems = [];
-      cartItems.push(item);
-    } else {
-      let itemAlreadyExists = false;
+    const existingItemIndex = cartItems.findIndex((item) => item.id === params && item.color === selectedColor);
 
-      for (let i = 0; i < cartItems.length; i++) {
-        if (cartItems[i].id === item.id && cartItems[i].color === item.color) {
-          itemAlreadyExists = true;
-          const currentQuantity = cartItems[i].quantity;
-          const updatedQuantity = parseInt(currentQuantity) + parseInt(selectedQuantity);
+    if (existingItemIndex !== -1) {
+      const existingItem = cartItems[existingItemIndex];
+      const currentQuantity = existingItem.quantity;
+      const newQuantity = parseInt(selectedQuantity);
+      const updatedQuantity = currentQuantity + newQuantity;
 
-          if (updatedQuantity > 100) {
-            cartItems[i].quantity = 100;
-            let remainingSpace = 100 - currentQuantity;
-            if (remainingSpace > 0) {
-              alert(`Vous avez déjà ${currentQuantity} article(s) sélectionné(s).
-              La limite maximale de 100 sera atteinte !
-              ${remainingSpace} articles supplémentaires seront ajoutés.`);
-            } else {
-              alert('Limite de quantité atteinte !');
-            }
-          } else {
-            cartItems[i].quantity = updatedQuantity;
-          }
-          break;
+      if (updatedQuantity > 100) {
+        const remainingSpace = 100 - currentQuantity;
+        if (remainingSpace > 0) {
+          alert(`Vous avez déjà ${currentQuantity} article(s) sélectionné(s).
+          La limite maximale de 100 sera atteinte !
+          ${remainingSpace} articles supplémentaires seront ajoutés.`);
+          existingItem.quantity = 100;
+        } else {
+          alert('Limite de quantité atteinte !');
         }
+      } else {
+        existingItem.quantity = updatedQuantity;
       }
-
-      if (!itemAlreadyExists) {
-        cartItems.push(item);
-      }
+    } else {
+      cartItems.push({
+        id: params,
+        quantity: parseInt(selectedQuantity),
+        color: selectedColor,
+      });
     }
 
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    window.location.href = 'cart.html';
+    window.location.href = 'index.html';
 
     showAddToCartMessage('Produit ajouté au panier');
   } else {
@@ -169,20 +158,19 @@ function checkFieldsValidity(quantity, color) {
 
 function updateCartItemQuantity() {
   const selectedColor = document.querySelector('#colors').value;
-  let cartItems = getByIdColor(params, selectedColor);
+  let cartItems = JSON.parse(localStorage.getItem('cartItems'));
+  const existingItemIndex = cartItems.findIndex((item) => item.id === params && item.color === selectedColor);
   let updatedQuantity = parseInt(document.querySelector('#quantity').value);
 
-  if (updatedQuantity !== null && cartItems !== undefined) {
-    cartItems.quantity = updatedQuantity;
+  if (updatedQuantity !== null && existingItemIndex !== -1) {
+    cartItems[existingItemIndex].quantity = updatedQuantity;
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }
 }
 
 //------ Recherche d'un article par son ID et sa couleur ------//
 
-function getByIdColor(id, color) {
-  let cartItems = JSON.parse(localStorage.getItem('cartItems'));
-
+function getByIdColor(cartItems, id, color) {
   if (cartItems !== null) {
     for (let i = 0; i < cartItems.length; i++) {
       if (cartItems[i].id === id && cartItems[i].color === color) {
