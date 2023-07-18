@@ -44,6 +44,8 @@ function card(data) {
     for (let i = 0; i < data.colors.length; i++) {
       createOption(data.colors[i]);
     }
+
+    updateCartItemQuantity();
   }
 }
 
@@ -154,15 +156,20 @@ function checkFieldsValidity(quantity, color) {
   }
 }
 
-//------ Mise à jour de la quantité de l'article du panier ------//
+//------ Mise à jour de la quantité de l'artic le du panier ------//
 
 function updateCartItemQuantity() {
-  const selectedColor = document.querySelector('#colors').value;
+  
   let cartItems = JSON.parse(localStorage.getItem('cartItems'));
+  if (cartItems === null) {
+    cartItems = [];
+  }
+
+  const selectedColor = document.querySelector('#colors').value;
   const existingItemIndex = cartItems.findIndex((item) => item.id === params && item.color === selectedColor);
   let updatedQuantity = parseInt(document.querySelector('#quantity').value);
 
-  if (updatedQuantity !== null && existingItemIndex !== -1) {
+  if (!isNaN(updatedQuantity) && existingItemIndex !== -1) {
     cartItems[existingItemIndex].quantity = updatedQuantity;
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }
