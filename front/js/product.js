@@ -132,7 +132,7 @@ function showAddToCartMessage(message) {
   // Supprimer le message après quelques secondes
   setTimeout(function () {
     containerElement.remove();
-  }, 5000);
+  }, 10000);
 }
 
 //------ Vérification de la validité des champs ------//

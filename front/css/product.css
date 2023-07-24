@@ -137,13 +137,13 @@
 .add-to-cart-message {
 	width: 400px;
 	text-align: center;
-  font-weight: bold;
-  background-color: #3d4c68;
+  	font-weight: bold;
+  	background-color: #3d4c68;
 	border: 2px solid #FFFF;
-  color: white;
-  padding: 10px;
-  border-radius: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  	color: white;
+  	padding: 10px;
+ 	border-radius: 20px;
+  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 

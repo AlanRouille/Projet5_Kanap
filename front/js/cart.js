@@ -363,7 +363,7 @@ function controlEmail() {
     errorMsg.textContent = 'Veuillez renseigner une adresse email valide pour continuer';
     return false;
   } else {
-    elem.setAttribute('style', 'color: black; padding-left: 10px;');
+    elem.setAttribute('style', 'border: 2px solid #000; padding-left: 10px;');;
     errorMsg.textContent = '';
     return true;
   }
