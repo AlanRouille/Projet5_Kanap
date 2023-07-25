@@ -20,3 +20,4 @@ function countItemsInCart() {
   document.addEventListener('DOMContentLoaded', () => {
     countItemsInCart();
   });
+
