@@ -116,24 +116,33 @@ function addItemToCart() {
 }
 
 //------ Affichage d'un message d'ajout au panier ------//
+function showAddToCartMessage (message) {
+  const messageElement = document.querySelector("#message") ? true : false;
+  if (messageElement) document.querySelector("#message").remove();
+  
+  const displayDuration = 2000;
+  const durationBetween = 2500;
+  const undisplayDuration = 3000;
 
-function showAddToCartMessage(message) {
-  const messageElement = document.createElement('div');
-  messageElement.classList.add('add-to-cart-message');
-  messageElement.textContent = message;
+  const container = document.createElement('div');
+  const content = document.createTextNode(message);
 
-  const containerElement = document.createElement('div');
-  containerElement.classList.add('add-to-cart-message-container');
-  containerElement.appendChild(messageElement);
+  container.appendChild(content);
+  container.id = "message";
+  container.classList.add("hideMessage");
 
-  const bodyElement = document.querySelector('body');
-  bodyElement.insertAdjacentElement('afterbegin', containerElement);
+  document.body.appendChild(container);
 
-  // Supprimer le message après quelques secondes
-  setTimeout(function () {
-    containerElement.remove();
-  }, 10000);
+  setTimeout(
+    () => container.classList.replace("hideMessage"),
+    displayDuration + durationBetween
+  );
+  setTimeout (
+    () => container.remove(),
+    displayDuration + durationBetween + undisplayDuration
+  );
 }
+
 
 //------ Vérification de la validité des champs ------//
 
@@ -156,7 +165,7 @@ function checkFieldsValidity(quantity, color) {
   }
 }
 
-//------ Mise à jour de la quantité de l'artic le du panier ------//
+//------ Mise à jour de la quantité de l'article du panier ------//
 
 function updateCartItemQuantity() {
   
