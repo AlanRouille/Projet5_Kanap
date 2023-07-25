@@ -118,32 +118,49 @@
 }
 
 /***************/
-/*Ajout du style */
+/*Ajout du style pour showMessage  */
 /***************/
 
-.add-to-cart-message-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 9999;
-}
-
-.add-to-cart-message {
-	width: 400px;
-	text-align: center;
-  	font-weight: bold;
-  	background-color: #3d4c68;
-	border: 2px solid #FFFF;
-  	color: white;
-  	padding: 10px;
- 	border-radius: 20px;
-  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+/* #message {
+	position: fixed;
+	top: 40%;
+	right: 250px;
+	margin-left: 10px;
+	padding: 20px;
+	background-color: #3d424f;
+	border: #fff 2px solid;
+	border-radius: 10px;
 }
 
 
+
+.hideMessage {
+	animation: hideMessage 3000ms forwards;
+} */
+
+#message {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 20px;
+	background-color: #3d424f;
+	border: #fff 2px solid;
+	border-radius: 10px;
+	opacity: 0;
+
+  }
+  
+  .hideMessage {
+	animation: hideMessage 3000ms forwards;
+  	}
+  
+  @keyframes hideMessage {
+	0% {
+	  opacity: 1;
+	}
+	100% {
+	  opacity: 0;
+	}
+  }
+  
