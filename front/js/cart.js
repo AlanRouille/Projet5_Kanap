@@ -358,8 +358,14 @@ function controlEmail() {
   const resultRegex = valueTextEmail.match(pattern);
   const errorMsg = document.querySelector('#emailErrorMsg');
 
-  if (resultRegex == null) {
-    elem.setAttribute('style', 'color: #ff0000; padding-left: 15px;');
+  const validExtensions = ['.com', '.fr', '.net', '.org']; 
+
+  const isValidExtension = validExtensions.some(extension =>
+    valueTextEmail.toLowerCase().endsWith(extension)
+  );
+
+  if (resultRegex == null || !valueTextEmail.includes('@')){
+    elem.setAttribute('style', 'border: 2px solid #FF0000; color: #ff0000; padding-left: 15px;');
     errorMsg.textContent = 'Veuillez renseigner une adresse email valide pour continuer';
     return false;
   } else {
@@ -427,19 +433,7 @@ function testForm() {
         }
         break;
       }
-      case 'email': {
-        if (element.value === '') {
-          element.setAttribute('style', 'border:2px solid #FF0000; padding-left: 10px');
-          document.getElementById('emailErrorMsg').style.display = 'block';
-          document.querySelector('#emailErrorMsg').textContent =
-            'Veuillez renseigner une adresse email valide pour continue';
-          pass = false;
-        } else {
-          element.setAttribute('style', 'border:2px solid #000; padding-left: 10px;');
-          document.getElementById('emailErrorMsg').style.display = 'none';
-        }
-        break;
-      }
+      
     }
   });
   return pass;

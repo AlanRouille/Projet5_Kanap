@@ -15,16 +15,6 @@ async function addProduct() {
     });
 }
 
-//------ Création de la balise option de couleur ------//
-
-function createOption(Choice) {
-  const Option = document.createElement('option');
-  Option.value = Choice;
-  Option.textContent = Choice;
-  const parent = document.querySelector('#colors');
-  parent.appendChild(Option);
-}
-
 //------ Récupération des données du fetch ------//
 
 function card(data) {
@@ -47,6 +37,16 @@ function card(data) {
 
     updateCartItemQuantity();
   }
+}
+
+//------ Création de la balise option de couleur ------//
+
+function createOption(Choice) {
+  const Option = document.createElement('option');
+  Option.value = Choice;
+  Option.textContent = Choice;
+  const parent = document.querySelector('#colors');
+  parent.appendChild(Option);
 }
 
 //------ Contrôle de la quantité ------//
@@ -115,13 +115,12 @@ function addItemToCart() {
   }
 }
 
-//------ Affichage d'un message d'ajout au panier ------//
-function showAddToCartMessage (message) {
-  const messageElement = document.querySelector("#message") ? true : false;
-  if (messageElement) document.querySelector("#message").remove();
-  
-  const displayDuration = 2000;
-  const durationBetween = 2500;
+// ------ Affichage d'un message d'ajout au panier ------//
+function showAddToCartMessage(message) {
+  const messageElement = document.querySelector("#message");
+  if (messageElement) messageElement.remove();
+
+  const displayDuration = 10000;
   const undisplayDuration = 3000;
 
   const container = document.createElement('div');
@@ -129,20 +128,19 @@ function showAddToCartMessage (message) {
 
   container.appendChild(content);
   container.id = "message";
-  container.classList.add("hideMessage");
+  container.classList.add("showMessage");
 
   document.body.appendChild(container);
 
   setTimeout(
-    () => container.classList.replace("hideMessage"),
-    displayDuration + durationBetween
+    () => container.classList.remove("showMessage"),
+    displayDuration 
   );
-  setTimeout (
+  setTimeout(
     () => container.remove(),
-    displayDuration + durationBetween + undisplayDuration
+    displayDuration + undisplayDuration 
   );
 }
-
 
 //------ Vérification de la validité des champs ------//
 
